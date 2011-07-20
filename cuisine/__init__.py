@@ -38,7 +38,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import os, base64, bz2, string, re, time, random, crypt
+import os, base64, bz2, string, re, time, random, crypt, functools, datetime
 import fabric, fabric.api, fabric.context_managers
 
 
@@ -406,5 +406,52 @@ def upstart_ensure( name ):
 		sudo("restart " + name)
 	else:
 		sudo("start " + name)
+
+def date(message=None, sticky=True):
+	"""Notify with a message and date.
+	"""
+	now = datetime.datetime.now()
+	notify('%s\n%s' % (now, message if message is not None else ''), sticky=sticky)
+
+def notify(msg, sticky=True):
+	"""Send a notification.
+	"""
+	with fabric.context_managers.settings(warn_only=True):
+		fabric.api.local("%(notifier)s %(stickyflag)s %(messageflag)s '%(message)s'" % dict(
+			notifier = fabric.api.env.get('notifier', 'growlnotify'),
+			stickyflag = fabric.api.env.get('stickyflag', '-s') if sticky else '',
+			messageflag = fabric.api.env.get('messageflag', '-m'),
+			message = msg.replace("'", r"'\''")))
+
+def notifies(sticky=False):
+        """Task decorator for sending a notification message on task entry.
+        """
+	if callable(sticky):
+		func = sticky
+		sticky = False
+	else:
+		func = None
+
+	def decorator(func):
+		@functools.wraps(func)
+		def notify(*args, **kwargs):
+			try:
+				msg = func.__doc__.split('\n')[0]
+			except (AttributeError, IndexError):
+				msg = ''
+			if args:
+				msg = "%s\n%s" % (msg, args)
+			if kwargs:
+				msg = "%s\n%s" % (msg, kwargs)
+			date(msg, sticky=sticky)
+			return func(*args, **kwargs)
+
+		return notify
+
+	if func is not None:
+		return decorator(func)
+	else:
+		return decorator
+
 
 # EOF - vim: ts=4 sw=4 noet
