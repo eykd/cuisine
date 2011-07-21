@@ -395,10 +395,9 @@ def ssh_authorize( user, key ):
 	d    = user_check(user)
 	keyf = d["home"] + "/.ssh/authorized_keys"
 	if file_exists(keyf):
-		if file_read(keyf).find(key) == -1:
-			file_append(keyf, key)
+                file_update(keyf, lambda _: text_ensure_line(_, key))
 	else:
-		file_write(keyf, key)
+		file_write(keyf, key, owner=user, group=user)
 
 def upstart_ensure( name ):
 	"""Ensures that the given upstart service is running, restarting it if necessary"""
