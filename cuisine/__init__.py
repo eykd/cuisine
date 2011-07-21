@@ -386,7 +386,7 @@ def ssh_keygen( user, keytype="dsa" ):
 	home = d["home"]
 	if not file_exists(home + "/.ssh/id_%s.pub" % keytype):
 		dir_ensure(home + "/.ssh", mode="0700", owner=user, group=user)
-		run("ssh-keygen -q -t %s -f '%s/.ssh/id_%s' -N ''" % (home, keytype, keytype))
+		run("ssh-keygen -q -t %s -f '%s/.ssh/id_%s' -N ''" % (keytype, home, keytype))
 		file_attribs(home + "/.ssh/id_%s" % keytype,     owner=user, group=user)
 		file_attribs(home + "/.ssh/id_%s.pub" % keytype, owner=user, group=user)
 
