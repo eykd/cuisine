@@ -5,7 +5,8 @@ import os, sys
 VERSION = eval(filter(lambda _:_.startswith("VERSION"), file("src/cuisine.py").readlines())[0].split("=")[1])
 setup(
 	name             = "cuisine",
-	packages         = ["cuisine",],
+	py_modules         = ["cuisine",],
+	package_dir      = {'': 'src'},
 	version          = VERSION,
 	description      = "Chef-like functionality for Fabric",
 	author           = "Sébastien Pierre",
