@@ -50,16 +50,32 @@ UNIX_EOL    = "\n"
 MAC_EOL     = "\n"
 
 
-def mode_user():
-	"""Cuisine functions will be executed as the current user."""
-	global MODE
-	MODE = "user"
+class mode_user(object):
+	def __init__(self):
+		global MODE
+		self._old_mode = MODE
+		MODE = "user"
 
-def mode_sudo():
-	"""Cuisine functions will be executed with sudo."""
-	global MODE
-	MODE = "sudo"
+	def __enter__(self):
+		pass
 
+	def __exit__(self, *args, **kws):
+		global MODE
+		MODE = self._old_mode
+
+class mode_sudo(object):
+	def __init__(self):
+		global MODE
+		self._old_mode = MODE
+		MODE = "sudo"
+
+	def __enter__(self):
+		pass
+
+	def __exit__(self, *args, **kws):
+		global MODE
+		MODE = self._old_mode
+		
 def run(*args, **kwargs):
 	"""A wrapper to Fabric's run/sudo commands, using the 'cuisine.MODE' global
 	to tell wether the command should be run as regular user or sudo."""
